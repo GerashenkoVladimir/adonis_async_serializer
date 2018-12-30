@@ -1,0 +1,17 @@
+{
+  "name": "adonis_async_serializer",
+  "version": "0.0.2",
+  "description": "Asynchronous Lucid model serializer for Adonis framework",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [
+    "adonis",
+    "serializer",
+    "model",
+    "lucid",
+    "async"
+  ],
+  "author": "Gerashenko Vladimir",
+  "email": "gera8469@gmail.com",
+  "license": "ISC"
+}
