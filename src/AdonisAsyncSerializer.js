@@ -1,6 +1,7 @@
 'use strict'
 
 let Model = null
+const { Config } = require('./Services')
 
 class AdonisAsyncSerializer {
   constructor(serializableResource) {
@@ -104,7 +105,7 @@ class AdonisAsyncSerializer {
   async _serializeOne(relatedModel, serializerName) {
     let serializableObj = null
     if (serializerName) {
-      const Serializer = use(AdonisAsyncSerializer.BASE_DIR + serializerName)
+      const Serializer = use(AdonisAsyncSerializer.BASE_NAMESPACE + serializerName)
       serializableObj = new Serializer(relatedModel)
     } else {
       serializableObj = relatedModel
@@ -114,6 +115,6 @@ class AdonisAsyncSerializer {
   }
 }
 
-AdonisAsyncSerializer.BASE_DIR = 'App/Serializers/'
+AdonisAsyncSerializer.BASE_NAMESPACE = Config.get('defaultNameSpace')
 
 module.exports = AdonisAsyncSerializer
