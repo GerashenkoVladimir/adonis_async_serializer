@@ -1,1 +1,1 @@
-module.exports = require('./src/AppSerializer')
+module.exports = require('./src/AdonisAsyncSerializer')

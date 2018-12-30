@@ -2,7 +2,7 @@
 
 let Model = null
 
-class AppSerializer {
+class AdonisAsyncSerializer {
   constructor(serializableResource) {
     if (!Model) {
       Model = use('Model')
@@ -104,7 +104,7 @@ class AppSerializer {
   async _serializeOne(relatedModel, serializerName) {
     let serializableObj = null
     if (serializerName) {
-      const Serializer = use(AppSerializer.BASE_DIR + serializerName)
+      const Serializer = use(AdonisAsyncSerializer.BASE_DIR + serializerName)
       serializableObj = new Serializer(relatedModel)
     } else {
       serializableObj = relatedModel
@@ -114,6 +114,6 @@ class AppSerializer {
   }
 }
 
-AppSerializer.BASE_DIR = 'App/Serializers/'
+AdonisAsyncSerializer.BASE_DIR = 'App/Serializers/'
 
-module.exports = AppSerializer
+module.exports = AdonisAsyncSerializer
