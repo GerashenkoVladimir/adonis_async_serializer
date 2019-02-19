@@ -83,7 +83,7 @@ class AdonisAsyncSerializer {
   async _handleHasOne(serializableObj, serializedObj) {
     for (const {relationName, serializerName} of this._hasOneRelations) {
       const relatedModel = await serializableObj[relationName]().fetch()
-      serializedObj[relationName] = await this._serializeOne(relatedModel, serializerName)
+      serializedObj[relationName] = relatedModel ? await this._serializeOne(relatedModel, serializerName) : null
     }
   }
 
