@@ -64,7 +64,7 @@ class AdonisAsyncSerializer {
     if (this._isResourceArray()) {
       serializableList = serializableCollection
     } else {
-      serializableList = serializableList.rows
+      serializableList = serializableCollection.rows
     }
     const serializedCollection = []
     for (const serializableObj of serializableList) {
