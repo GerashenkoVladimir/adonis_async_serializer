@@ -70,7 +70,7 @@ app/Controllers/Http/UserController.js
 
 const UserSerializer = use('App/Serializers/UserSerializer')
 
-class Class {
+class UserController {
   async show ({ params }) {
     const user = await User.find(params.id)
     const userSerializer = new UserSerializer(user)
