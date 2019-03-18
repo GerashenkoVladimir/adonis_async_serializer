@@ -31,6 +31,8 @@ start/app.js
 ```javascript
 'use strict'
 
+const path = require('path')
+
 const providers = [
   path.join(__dirname, '..', 'providers', 'AsyncSerializerProvider')
 ]
