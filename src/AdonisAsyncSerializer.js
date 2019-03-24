@@ -4,7 +4,7 @@ let Model = null
 const { Config } = require('./Services')
 
 class AdonisAsyncSerializer {
-  constructor(serializableResource) {
+  constructor (serializableResource) {
     if (!Model) {
       Model = use('Model')
     }
@@ -15,19 +15,19 @@ class AdonisAsyncSerializer {
     this._hasManyRelations = []
   }
 
-  addAttributes(...attributes) {
+  addAttributes (...attributes) {
     this._attributes = this._attributes.concat(attributes)
   }
 
-  addHasOne(relationName, serializerName) {
-    this._hasOneRelations.push({relationName, serializerName})
+  addHasOne (relationName, serializerName) {
+    this._hasOneRelations.push({ relationName, serializerName })
   }
 
-  addHasMany(relationName, serializerName) {
-    this._hasManyRelations.push({relationName, serializerName})
+  addHasMany (relationName, serializerName) {
+    this._hasManyRelations.push({ relationName, serializerName })
   }
 
-  async toJSON() {
+  async toJSON () {
     let result = null
 
     if (this._isResourceIterable()) {
@@ -39,19 +39,19 @@ class AdonisAsyncSerializer {
     return result
   }
 
-  _isResourceIterable() {
+  _isResourceIterable () {
     return this._isResourceArray() || this._isResourceSerializerCollection()
   }
 
-  _isResourceArray() {
+  _isResourceArray () {
     return this._serializableResource instanceof Array
   }
 
-  _isResourceSerializerCollection() {
+  _isResourceSerializerCollection () {
     return this._serializableResource instanceof Model.Serializer || this._serializableResource.rows
   }
 
-  async _serializeObj(serializableObj) {
+  async _serializeObj (serializableObj) {
     const serializedObj = {}
     this._handleAttributes(serializableObj, serializedObj)
     await this._handleHasOne(serializableObj, serializedObj)
@@ -59,7 +59,7 @@ class AdonisAsyncSerializer {
     return serializedObj
   }
 
-  async _serializeCollection(serializableCollection) {
+  async _serializeCollection (serializableCollection) {
     let serializableList = null
     if (this._isResourceArray()) {
       serializableList = serializableCollection
@@ -74,27 +74,27 @@ class AdonisAsyncSerializer {
     return serializedCollection
   }
 
-  _handleAttributes(serializableObj, serializedObj) {
+  _handleAttributes (serializableObj, serializedObj) {
     this._attributes.forEach((attribute) => {
       serializedObj[attribute] = serializableObj[attribute]
     })
   }
 
-  async _handleHasOne(serializableObj, serializedObj) {
-    for (const {relationName, serializerName} of this._hasOneRelations) {
+  async _handleHasOne (serializableObj, serializedObj) {
+    for (const { relationName, serializerName } of this._hasOneRelations) {
       const relatedModel = await serializableObj[relationName]().fetch()
       serializedObj[relationName] = relatedModel ? await this._serializeOne(relatedModel, serializerName) : null
     }
   }
 
-  async _handleHasMany(serializableObj, serializedObj) {
-    for (const {relationName, serializerName} of this._hasManyRelations) {
+  async _handleHasMany (serializableObj, serializedObj) {
+    for (const { relationName, serializerName } of this._hasManyRelations) {
       const relatedModels = await serializableObj[relationName]().fetch()
       serializedObj[relationName] = await this._serializeMany(relatedModels.rows, serializerName)
     }
   }
 
-  async _serializeMany(relationModels, serializerName) {
+  async _serializeMany (relationModels, serializerName) {
     const serializedObjects = []
     for (const relatedModel of relationModels) {
       serializedObjects.push(await this._serializeOne(relatedModel, serializerName))
@@ -102,7 +102,7 @@ class AdonisAsyncSerializer {
     return serializedObjects
   }
 
-  async _serializeOne(relatedModel, serializerName) {
+  async _serializeOne (relatedModel, serializerName) {
     let serializableObj = null
     if (serializerName) {
       const Serializer = use(AdonisAsyncSerializer.BASE_NAMESPACE + serializerName)
