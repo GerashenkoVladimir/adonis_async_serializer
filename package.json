@@ -17,5 +17,16 @@
   "repository": {
     "type" : "git",
     "url" : "https://github.com/GerashenkoVladimir/adonis_async_serializer"
+  },
+  "standard": {
+    "globals": [
+      "use",
+      "ace",
+      "consoleLog",
+      "testHelpers"
+    ],
+    "ignore": [
+      "node_modules"
+    ]
   }
 }
