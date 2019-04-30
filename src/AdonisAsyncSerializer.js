@@ -66,12 +66,11 @@ class AdonisAsyncSerializer {
     } else {
       serializableList = serializableCollection.rows
     }
-    const serializedCollection = []
+    const preparedList = []
     for (const serializableObj of serializableList) {
-      serializedCollection.push(await this._serializeObj(serializableObj))
+      preparedList.push(this._serializeObj(serializableObj))
     }
-
-    return serializedCollection
+    return Promise.all(preparedList)
   }
 
   _handleAttributes (serializableObj, serializedObj) {
