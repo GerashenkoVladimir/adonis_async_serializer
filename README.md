@@ -70,7 +70,7 @@ app/Controllers/Http/UserController.js
 
 const UserSerializer = use('App/Serializers/UserSerializer')
 
-class Class {
+class UserController {
   async show ({ params }) {
     const user = await User.find(params.id)
     const userSerializer = new UserSerializer(user)
@@ -84,7 +84,10 @@ class Class {
     const userSerializer = new UserSerializer(users)
     const usersSerialized = await userSerializer.toJSON() 
     
-    return { resource: usersSerialized }
+    return { resources: usersSerialized }
   }
 }
 ```
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
