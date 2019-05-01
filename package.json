@@ -1,6 +1,6 @@
 {
   "name": "adonis_async_serializer",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Asynchronous Lucid model serializer for Adonis framework",
   "main": "index.js",
   "scripts": {},
@@ -15,8 +15,8 @@
   "email": "gera8469@gmail.com",
   "license": "ISC",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/GerashenkoVladimir/adonis_async_serializer"
+    "type": "git",
+    "url": "https://github.com/GerashenkoVladimir/adonis_async_serializer"
   },
   "standard": {
     "globals": [
