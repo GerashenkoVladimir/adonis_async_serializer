@@ -2,6 +2,7 @@
 
 let Model = null
 const { Config } = require('./Services')
+const RelationNotExistsException = require('./Exceptions/RelationNotExistsException')
 
 class AdonisAsyncSerializer {
   constructor (serializableResource) {
@@ -84,7 +85,7 @@ class AdonisAsyncSerializer {
   async _handleHasOne (serializableObj, serializedObj) {
     const preparedList = this._hasOneRelations.map(({ relationName, serializerName }) => {
       return (async () => {
-        const relatedModel = await serializableObj[relationName]().fetch()
+        const relatedModel = await this._resolveRelation(serializableObj, relationName)
         serializedObj[relationName] = relatedModel ? await this._serializeOne(relatedModel, serializerName) : null
       })()
     })
@@ -95,7 +96,7 @@ class AdonisAsyncSerializer {
   async _handleHasMany (serializableObj, serializedObj) {
     const preparedList = this._hasManyRelations.map(({ relationName, serializerName }) => {
       return (async () => {
-        const relatedModels = await serializableObj[relationName]().fetch()
+        const relatedModels = await this._resolveRelation(serializableObj, relationName)
         serializedObj[relationName] = await this._serializeMany(relatedModels.rows, serializerName)
       })()
     })
@@ -119,6 +120,14 @@ class AdonisAsyncSerializer {
     }
 
     return serializableObj.toJSON()
+  }
+
+  async _resolveRelation (serializableObj, relationName) {
+    if (!serializableObj[relationName]) {
+      throw new RelationNotExistsException(`Relation with name [${relationName}] for model [${serializableObj.constructor.name}] doesn't exist! (${this.constructor.name})`)
+    }
+
+    return serializableObj[relationName]().fetch()
   }
 }
 
