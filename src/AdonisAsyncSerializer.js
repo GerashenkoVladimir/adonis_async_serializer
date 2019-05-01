@@ -54,8 +54,12 @@ class AdonisAsyncSerializer {
   async _serializeObj (serializableObj) {
     const serializedObj = {}
     this._handleAttributes(serializableObj, serializedObj)
-    await this._handleHasOne(serializableObj, serializedObj)
-    await this._handleHasMany(serializableObj, serializedObj)
+
+    await Promise.all([
+      this._handleHasOne(serializableObj, serializedObj),
+      this._handleHasMany(serializableObj, serializedObj)
+    ])
+
     return serializedObj
   }
 
@@ -66,10 +70,8 @@ class AdonisAsyncSerializer {
     } else {
       serializableList = serializableCollection.rows
     }
-    const preparedList = []
-    for (const serializableObj of serializableList) {
-      preparedList.push(this._serializeObj(serializableObj))
-    }
+    const preparedList = serializableList.map(serializableObj => this._serializeObj(serializableObj))
+
     return Promise.all(preparedList)
   }
 
@@ -80,25 +82,31 @@ class AdonisAsyncSerializer {
   }
 
   async _handleHasOne (serializableObj, serializedObj) {
-    for (const { relationName, serializerName } of this._hasOneRelations) {
-      const relatedModel = await serializableObj[relationName]().fetch()
-      serializedObj[relationName] = relatedModel ? await this._serializeOne(relatedModel, serializerName) : null
-    }
+    const preparedList = this._hasOneRelations.map(({ relationName, serializerName }) => {
+      return (async () => {
+        const relatedModel = await serializableObj[relationName]().fetch()
+        serializedObj[relationName] = relatedModel ? await this._serializeOne(relatedModel, serializerName) : null
+      })()
+    })
+
+    await Promise.all(preparedList)
   }
 
   async _handleHasMany (serializableObj, serializedObj) {
-    for (const { relationName, serializerName } of this._hasManyRelations) {
-      const relatedModels = await serializableObj[relationName]().fetch()
-      serializedObj[relationName] = await this._serializeMany(relatedModels.rows, serializerName)
-    }
+    const preparedList = this._hasManyRelations.map(({ relationName, serializerName }) => {
+      return (async () => {
+        const relatedModels = await serializableObj[relationName]().fetch()
+        serializedObj[relationName] = await this._serializeMany(relatedModels.rows, serializerName)
+      })()
+    })
+
+    await Promise.all(preparedList)
   }
 
   async _serializeMany (relationModels, serializerName) {
-    const serializedObjects = []
-    for (const relatedModel of relationModels) {
-      serializedObjects.push(await this._serializeOne(relatedModel, serializerName))
-    }
-    return serializedObjects
+    const preparedList = relationModels.map(relatedModel => this._serializeOne(relatedModel, serializerName))
+
+    return Promise.all(preparedList)
   }
 
   async _serializeOne (relatedModel, serializerName) {
