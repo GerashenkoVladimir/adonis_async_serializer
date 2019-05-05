@@ -5,15 +5,17 @@ const { Config } = require('./Services')
 const RelationNotExistsException = require('./Exceptions/RelationNotExistsException')
 
 class AdonisAsyncSerializer {
-  constructor (serializableResource) {
+  constructor (serializableResource, serviceData = {}) {
     if (!Model) {
       Model = use('Model')
     }
 
+    this._serviceData = serviceData
     this._serializableResource = serializableResource
     this._attributes = []
     this._hasOneRelations = []
     this._hasManyRelations = []
+    this._callbackResolvers = []
   }
 
   addAttributes (...attributes) {
@@ -26,6 +28,14 @@ class AdonisAsyncSerializer {
 
   addHasMany (relationName, serializerName) {
     this._hasManyRelations.push({ relationName, serializerName })
+  }
+
+  addWithCallback (propertyName, callbackResolver) {
+    this._callbackResolvers.push({ propertyName, callbackResolver })
+  }
+
+  mergeServiceData (serviceData = {}) {
+    this._serviceData = { ...serviceData, ...this._serviceData }
   }
 
   async toJSON () {
@@ -58,7 +68,8 @@ class AdonisAsyncSerializer {
 
     await Promise.all([
       this._handleHasOne(serializableObj, serializedObj),
-      this._handleHasMany(serializableObj, serializedObj)
+      this._handleHasMany(serializableObj, serializedObj),
+      this._handleCallbackResolvers(serializableObj, serializedObj)
     ])
 
     return serializedObj
@@ -104,6 +115,16 @@ class AdonisAsyncSerializer {
     await Promise.all(preparedList)
   }
 
+  async _handleCallbackResolvers (serializableObj, serializedObj) {
+    const preparedList = this._callbackResolvers.map(({ propertyName, callbackResolver }) => {
+      return (async () => {
+        serializedObj[propertyName] = await callbackResolver(serializableObj, { ...this._serviceData })
+      })()
+    })
+
+    await Promise.all(preparedList)
+  }
+
   async _serializeMany (relationModels, serializerName) {
     const preparedList = relationModels.map(relatedModel => this._serializeOne(relatedModel, serializerName))
 
@@ -115,6 +136,7 @@ class AdonisAsyncSerializer {
     if (serializerName) {
       const Serializer = use(AdonisAsyncSerializer.BASE_NAMESPACE + serializerName)
       serializableObj = new Serializer(relatedModel)
+      serializableObj.mergeServiceData(this._serviceData)
     } else {
       serializableObj = relatedModel
     }
