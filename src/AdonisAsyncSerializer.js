@@ -39,6 +39,10 @@ class AdonisAsyncSerializer {
   }
 
   async toJSON () {
+    if (!this._serializableResource) {
+      return this._serializableResource
+    }
+
     let result = null
 
     if (this._isResourceIterable()) {
