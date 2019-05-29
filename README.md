@@ -43,6 +43,9 @@ const providers = [
 
 
 # Usage
+
+### Simple
+
 app/Serializers/UserSerializer.js
 ```javascript
 'use strict'
@@ -88,6 +91,86 @@ class UserController {
   }
 }
 ```
-## License
+### With callback
+
+app/Serializers/UserSerializer.js
+```javascript
+'use strict'
+
+const BaseAsyncSerializer = use('BaseAsyncSerializer')
+const PostSerializer = use('App/Serializers/PostSerializer')
+
+class UserSerializer extends BaseAsyncSerializer {
+  constructor (serializableResource) {
+    super(serializableResource)
+    
+    /* some code*/
+    
+    this.addWithCallback('posts', async (user) => {
+      const posts = await user.posts().where({ isPublished: true }).fetch()
+      const postSerializer = new PostSerializer(posts)
+    
+      return postSerializer.toJSON()
+    })
+    
+    this.addWithCallback('fullName', (user) => {
+      return `${user.firstName} ${user.lastName}`
+    })
+    
+    /* some code*/
+  }
+}
+
+module.exports = UserSerializer
+```
+
+### With service data
+
+! The root serializer transfers service data to all nested serializers.
+
+app/Serializers/UserSerializer.js
+```javascript
+'use strict'
+
+const BaseAsyncSerializer = use('BaseAsyncSerializer')
+const PostSerializer = use('App/Serializers/PostSerializer')
+
+class UserSerializer extends BaseAsyncSerializer {
+  constructor (serializableResource, serviceData) {
+    super(serializableResource, serviceData)
+    
+    /* some code*/
+    
+    this.addWithCallback('posts', async (user, serviceData) => {
+      const posts = await user.posts().where({ isPublished: serviceData.isPublished }).fetch()
+      const postSerializer = new PostSerializer(posts)
+    
+      return postSerializer.toJSON()
+    })
+    /* some code*/
+  }
+}
+
+module.exports = UserSerializer
+```
+
+app/Controllers/Http/UserController.js
+```javascript
+'use strict'
+
+const UserSerializer = use('App/Serializers/UserSerializer')
+
+class UserController {
+  async show ({ params }) {
+    const user = await User.find(params.id)
+    const userSerializer = new UserSerializer(user, {isPublished: true})
+    const userSerialized = await userSerializer.toJSON() 
+    
+    return { resource: userSerialized }
+  }
+}
+```
+
+# License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
